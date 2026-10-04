@@ -1,0 +1,4 @@
+erofs-dedup
+*.erofs
+*.idx
+CLAUDE.md
