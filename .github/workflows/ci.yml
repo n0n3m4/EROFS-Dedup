@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: sudo apt-get install -y --no-install-recommends erofs-utils
+      - run: go vet ./...
+      - run: go test -race -count=1 ./...
+      - run: go build -trimpath -ldflags=-s -o erofs-dedup .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: erofs-dedup-linux-amd64
+          path: erofs-dedup
+      - if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: erofs-dedup
+          generate_release_notes: true
