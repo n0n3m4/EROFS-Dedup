@@ -17,7 +17,12 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - run: sudo apt-get install -y --no-install-recommends erofs-utils
+      - name: Build erofs-utils 1.9 (Ubuntu's 1.7.1 predates the 48-bit feature)
+        run: |
+          sudo apt-get install -y --no-install-recommends autoconf automake libtool pkg-config liblz4-dev liblzma-dev uuid-dev zlib1g-dev
+          git clone -q --depth 1 -b v1.9 https://git.kernel.org/pub/scm/linux/kernel/git/xiang/erofs-utils.git /tmp/erofs-utils
+          cd /tmp/erofs-utils && ./autogen.sh && ./configure --disable-fuse --enable-lzma >/dev/null && make -j"$(nproc)" >/dev/null && sudo make install >/dev/null
+          fsck.erofs --help 2>&1 | head -1
       - run: go vet ./...
       - run: go test -race -count=1 ./...
       - run: go build -trimpath -ldflags=-s -o erofs-dedup .
