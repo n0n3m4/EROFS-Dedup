@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04 # erofs-utils 1.9; 24.04 ships 1.7.1, which predates the 48-bit feature
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
